@@ -7,26 +7,26 @@
 %%% @end
 %%% Created : 09. Oct 2022 7:17 AM
 %%%-------------------------------------------------------------------
--module('GossipServer').
+-module('GossipServer_bonus').
 -author("ayushkumar").
 
 %% API
--export([start/3, start_all_actor_nodes/4, stop/0, init/6, supervisor_listener_loop/2, stop_all_actor_nodes/1, initialize_epidemic/2]).
+-export([start/5, start_all_actor_nodes/4, stop/0, init/6, supervisor_listener_loop/2, stop_all_actor_nodes/1, initialize_epidemic/2]).
 -record(activeNodes, {activeActorNodes}).
 -record(adjacencyList, {nodeToNbrListMap}).
 -record(nodeToNodeNumMap, {nodeToNodeNumMap}).
 -record(nodeToDoneMap, {nodeToDoneMap}).
 -define(MaxPropagationsPerNode, 10).
 
-start(NumNodes, Topology, Algorithm) ->
+start(NumNodes, Topology, Algorithm, ShouldTestFaultTol, NumNodesToKill) ->
   Message = "test",
-  Pid = spawn(?MODULE, init, [NumNodes, Topology, Algorithm, Message]),
+  Pid = spawn(?MODULE, init, [NumNodes, Topology, Algorithm, Message, ShouldTestFaultTol, NumNodesToKill]),
   register(?MODULE, Pid).
 
 stop() ->
   self() ! terminate.
 
-init(NumNodes, Topology, Algorithm, Message) ->
+init(NumNodes, Topology, Algorithm, Message, ShouldTestFaultTol, NumNodesToKill) ->
   ActiveNodes = #activeNodes{activeActorNodes = []},
   NodeToNodeNumMap = #nodeToNodeNumMap{nodeToNodeNumMap = maps:new()},
   NodeToDoneMap = #nodeToDoneMap{nodeToDoneMap = maps:new()},
@@ -36,6 +36,8 @@ init(NumNodes, Topology, Algorithm, Message) ->
   statistics(wall_clock),
   initialize_epidemic(Algorithm, Message),
   supervisor_listener_loop(Algorithm, NodeToDoneMap),
+  if ShouldTestFaultTol == true ->
+    killNActorsRandomly()
   end.
 
 supervisor_listener_loop(Algo, #nodeToDoneMap{nodeToDoneMap = NodeToDoneMap}) ->
@@ -61,7 +63,7 @@ supervisor_listener_loop(Algo, #nodeToDoneMap{nodeToDoneMap = NodeToDoneMap}) ->
       {_, Time2} = statistics(wall_clock),
       U1 = Time1 * 1000,
       U2 = Time2 * 1000,
-      io:format("Time taken for convergence =~p (~p) microseconds~n",
+      io:format("Code time=~p (~p) microseconds~n",
         [U1,U2]),
       exit(normal)
   end,
@@ -91,4 +93,9 @@ initialize_epidemic(Algorithm, Message) ->
     "PushSum" -> FirstPid ! {receivedPushSum, 1/2, 1/2};
     _ -> FirstPid ! {receivedGossip, Message}
   end.
+
+killNActorsRandomly() ->
+  ChooseOneOutOf = maps:values(#adjacencyList.nodeToNbrListMap),
+  CurrPid = lists:nth(rand:uniform(length(ChooseOneOutOf)), ChooseOneOutOf),
+  CurrPid ! terminate.
 
