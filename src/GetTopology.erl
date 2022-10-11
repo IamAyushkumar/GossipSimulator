@@ -30,11 +30,6 @@ st(ListOfPids,Topology,Algorithm) ->
 init(ListOfPids,Topology,Algorithm) ->
   NumberOfActor=length(ListOfPids),
   selectTopology(ListOfPids,Topology),
-  StartTime=erlang:timestamp(),
-  selectAlgorithm(Algorithm,NumberOfActor, StartTime),
-  StopTime=erlang:timestamp(),
-  Diff= StopTime - StartTime,
-  io:fwrite("Time taken ->", Diff).
 
 
 selectTopology(ListOfPids, Topology)->
@@ -45,12 +40,6 @@ selectTopology(ListOfPids, Topology)->
     "imperfect3d" ->createImperfect3D(ListOfPids)
   end.
 
-
-selectAlgorithm(Algorithm,NumberOfActor, StartTime)->
-  case Algorithm of
-    "gossip" -> startGossip(NumberOfActor, StartTime);
-    "push-sum" ->startPushSum(NumberOfActor, StartTime)
-  end.
 
 
 % methods below
