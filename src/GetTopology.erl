@@ -10,18 +10,19 @@
 -author("akashkumar").
 
 %% API
--export([start/3,init/3,selectTopology/2,selectAlgorithm/3,createFull/1,createLine/1,create2D/1,createImperfect3D/1]).
+-export([st/3,init/3,selectTopology/2,selectAlgorithm/3,createFull/1,createLine/1,create2D/1,createImperfect3D/1]).
 -export([updateIn2D_3D/6,updateAdjInLine/3,updateAdjIn2D_3D/5,updateInLine/3,updateInLine/3,make1DGrid/1,make2DGrid/3,updateInFull/3,find_X/2,find_XY/3]).
 
 -records(actorDetails,{
 %for every actors these details is associated - { PID, S, WEIGHT, X-AXIS,Y-AXIS, PING COUNT,NEIGHBOURS LIST}
-  Pid, S, W, X,Y, Pscount, Adjacenylist
+    pid, s, w, x,y, pscount, adjacenylist
 }).
 
+-record(actorDetails, {nth}).
 -record(allActor,{actorDetails}).
 
 
-start(ListOfPids,Topology,Algorithm) ->
+st(ListOfPids,Topology,Algorithm) ->
   Pid = spawn(?MODULE, init, [ListOfPids,Topology,Algorithm]),
   register(?MODULE, Pid).
 
@@ -39,7 +40,7 @@ init(ListOfPids,Topology,Algorithm) ->
 selectTopology(ListOfPids, Topology)->
   case Topology of
     "full" ->createFull(ListOfPids);
-    "rand2D" ->create2D(ListOfPids);
+    "2D" ->create2D(ListOfPids);
     "line" ->createLine(ListOfPids);
     "imperfect3d" ->createImperfect3D(ListOfPids)
   end.
@@ -52,19 +53,15 @@ selectAlgorithm(Algorithm,NumberOfActor, StartTime)->
   end.
 
 
-
-
-
 % methods below
-
 %finding the coordinates in the adjacency List
 find_XY([T], X,Y) ->
-  if (X == #T.X and Y == #T.Y) -> {T} end,
+  if (X == #actorDetails.x and Y == #actorDetails.y) -> {actorDetails} end,
   find_XY([_|T],X,Y).
 
 find_X([T], X) ->
-  if (X==#T.X) -> {T} end,
-  find_X([_|T],X,Y).
+  if (X==#actorDetails.x) -> {T} end,
+  find_X([_|T],X).
 
 
 %Updating the adjacency per topology
@@ -85,7 +82,7 @@ updateAdjInLine(Actorgraph,Pos, Node)->
 
 
 
-updateInFull(Actorarray,S,N) when S<N->
+updateInFull(Actorarray,S,N) when S<N ->
   Start = 0,
   for(Start,N,S,Actorarray) when Start < N ->
     if Start /= S -> update1D(Actorarray,Start,S)
@@ -115,27 +112,27 @@ updateIn2D_3D(Actorgraph,StartRow, StartColumn, Row, Col, Diagonal) ->
   if
     StartRow < Row and StartColumn < Col ->
       if StartRow-1 > 0 ->
-        update_state(StartRow, StartColumn, StartRow-1, StartColumn) end,
+        updateAdjIn2D_3D(Actorgraph,StartRow, StartColumn, StartRow-1, StartColumn) end,
       if (StartRow + 1) < Row ->
-        update_state(StartRow, StartColumn, StartRow+1, StartColumn) end,
+        updateAdjIn2D_3D(Actorgraph,StartRow, StartColumn, StartRow+1, StartColumn) end,
       if (StartColumn-1) > 0 ->
-        update_state(StartRow, StartColumn, StartRow, StartColumn-1)end,
+        updateAdjIn2D_3D(Actorgraph,StartRow, StartColumn, StartRow, StartColumn-1)end,
       if (StartColumn-1) <  Col ->
-        update_state(StartRow, StartColumn, StartRow, StartColumn+1) end,
+        updateAdjIn2D_3D(Actorgraph,StartRow, StartColumn, StartRow, StartColumn+1) end,
       if
         Diagonal == true ->
           if (StartRow-1) > 0 and (StartColumn-1) > 0 ->
-            update_state(StartRow, StartColumn, StartRow-1, StartColumn-1) end,
+            updateAdjIn2D_3D(Actorgraph,StartRow, StartColumn, StartRow-1, StartColumn-1) end,
           if (StartRow+1) < Row and (StartColumn+1) < Col ->
-            update_state(StartRow, StartColumn, StartRow+1, StartColumn+1) end,
+            updateAdjIn2D_3D(Actorgraph,StartRow, StartColumn, StartRow+1, StartColumn+1) end,
           if (StartColumn+1) < Col and (StartRow-1) >0  ->
-            update_state(StartRow, StartColumn, StartRow-1, StartColumn+1) end,
+            updateAdjIn2D_3D(Actorgraph,StartRow, StartColumn, StartRow-1, StartColumn+1) end,
           if (StartColumn-1) >0 and (StartRow+1) < Row ->
-            update_state(StartRow, StartColumn, StartRow+1, StartColumn-1) end,
+            updateAdjIn2D_3D(Actorgraph,StartRow, StartColumn, StartRow+1, StartColumn-1) end,
           %In case of Imperfect 3D (all eight neighbours )- 2D + 1 random node
           X = rand:uniform(Row),
           Y = rand:uniform(Col),
-          update_state(StartRow, StartColumn, X,Y)
+          updateAdjIn2D_3D(Actorgraph, StartRow, StartColumn, X,Y)
       end
   end,
   if
@@ -143,10 +140,9 @@ updateIn2D_3D(Actorgraph,StartRow, StartColumn, Row, Col, Diagonal) ->
       loop( Actorgraph, StartRow, StartColumn+1, Row, Col,Diagonal);
 
     StartRow < Row->
-      loop( Actorgraph, StartRow+1, StartColumn, Row, Col, Diagonal);
+      loop( Actorgraph, StartRow+1, StartColumn, Row, Col, Diagonal)
 
   end.
-
 
 
 %Topology
@@ -171,7 +167,7 @@ create2D(ListOfPids)->
   end,
   Actorarray = make2DGrid(ListOfPids,Rows,Columns),
   %diagonal sending as false
-  loop(Actorarray,0,0,Rows,Columns,false).
+  updateIn2D_3D(Actorarray,0,0,Rows,Columns,false).
 
 
 createImperfect3D(ListOfPids)->
@@ -185,7 +181,7 @@ createImperfect3D(ListOfPids)->
   end,
   Actorarray = make2DGrid(ListOfPids,Rows,Columns),
   %diagonally sending as true plus one random node
-  loop(Actorarray,0,0,Rows,Columns,true).
+  updateIn2D_3D(Actorarray,0,0,Rows,Columns,true).
 
 
 make2DGrid(ListOfPid,Rows, Cols)->
@@ -211,12 +207,12 @@ make1DGrid(ListOfPid)->
   S=0,
   I=0,
   Allactor=[],
-  for(S,AllActor) when S < AllActor ->
+  for(S,AllActor,I,ListOfPid) when S < AllActor ->
+    Pid=nth(I,ListOfPid),
     %intialization state of an actor
-    {Actordetails=#actorDetails{nth(I,ListOfPid),0,0,1,S,C,[]}},
-    Allactor=append(Actordetails,[AllActor]),
+    {Actordetails=#actorDetails{Pid,0,0,1,S,0,[]}},
+    AllactorList=append(Actordetails,[AllActor]),
     I=I+1,
-    for(S+1,AllActor),
+    for(S+1,AllActor,I,ListOfPid),
     %for(0,0,Rows,Cols),
-  Allactor = #allActor{Allactor},
-  {Allactor}.
+  Allactor = #allActor.actorDetails{AllActorList}.
