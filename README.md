@@ -19,12 +19,13 @@ Following Topologies are supported:
 
 For 2D and Imperfect 3D topologies, the number of nodes is rounded to the square of the square root of the input nodes.
 
-Neighbours:
-          Line: Actor3<------ Actor 1 ---> Actor 2
-          Full Network : Actor 1 --->[N-1 Actor]
-          2D grid : Actor 1->[4 neighbours- X+1,X-1,Y-1,Y+1]
-          Imprefect 3D: Actor 1-->[ 8 neighbours - ( 4 of (2d grid) + 4 diagonal ) + 1 random node in the network.
+Neighbours Example in Topologies:
+          Line:                   Actor3<------ Actor 1 ---> Actor 2
+          Full Network :          Actor 1 --->[N-1 Actor]
+          2D grid :               Actor 1->[4 neighbours- X+1,X-1,Y-1,Y+1]
+          Imprefect 3D:           Actor 1-->[8 neighbours] - ( 4 of (2d grid) + 4 diagonal ) + 1 random node in the network.
           
+
 
 What is the largest network you managed to deal with for each type of topology and algorithm?
 
