@@ -2,13 +2,13 @@ Gossip type algorithms can be used both for group communication and for aggregat
 This project is to determine the convergence of Gossip algorithms and Push-Sum Algorithm through 
 a simulator based on actors written in Erlang.
 
-Input: nodeNumber, topoType and algorithm, Where numNodes is the number of actors involved, topology is one of full, 2D, line, imp3D, and algorithm is one of gossip, push-sum.
+Inputs: Number of Nodes , Topology to be used (which can be of type line, 2D, Imperfect 3D, Full), and algorithm to be used (Gossip or Push Sum). Test for fault tolerancy is also supported via inputs Boolean - 'ShouldTestFaultTolerancy' and Number of nodes to kill if fault tolerancy is to be tested.  
 Output: Convergence time
 
-Team members
-Name	        UFID
-Akash Kumar	    80024442
-Ayush Kumar	    
+Team members (Authors)
+Name	        UFID        emailID
+Akash Kumar	    80024442    akashkumar@ufl.edu
+Ayush Kumar	    54666085    ayushkumar@ufl.edu
 
 What is working ?
 Following Topologies are supported:
@@ -19,9 +19,14 @@ Following Topologies are supported:
 
 For 2D and Imperfect 3D topologies, the number of nodes is rounded to the square of the square root of the input nodes.
 
-
-
 What is the largest network you managed to deal with for each type of topology and algorithm?
+
+Type of algorithm | gossip | push-sum |
+---------------------------------------
+full              | 79000  | 67000    |
+line              | 70     | 70       | 
+2D                | 600    | 700      | 
+imp3D             | 2000   | 3000     | 
 
 Test Environment
 OS: Mac OS- Monterey

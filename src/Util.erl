@@ -19,13 +19,12 @@ get_random_pid_from_nbrs(Neighbors) ->
 get_adjacency_list_from_topology(ActiveNodes, Topology) -> maps:new().
 
 replace_died_with_respawned_node(DiedPid, RespawnedPid, Map) ->
-%%  {ok, NeighborNodes} = maps:find(DiedPid, Map),
   NeighborNodes = maps:get(DiedPid, Map, []),
   if length(NeighborNodes) == 0 -> Map;
     true ->
       RemovedMap = maps:remove(DiedPid, Map),
       UpdatedMap = maps:put(RespawnedPid, NeighborNodes, RemovedMap),
-      Fun = fun(List) -> if lists:find
+      UpdatedMap
   end.
 
 

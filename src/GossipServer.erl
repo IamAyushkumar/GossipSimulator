@@ -11,16 +11,15 @@
 -author("ayushkumar").
 
 %% API
--export([start/6, start_all_actor_nodes/4, stop/0, init/6, supervisor_listener_loop/2, stop_all_actor_nodes/1, initialize_epidemic/2]).
+-export([start/5, start_all_actor_nodes/4, stop/0, init/6, supervisor_listener_loop/2, stop_all_actor_nodes/1, initialize_epidemic/2]).
 -record(activeNodes, {activeActorNodes}).
 -record(adjacencyList, {nodeToNbrListMap}).
 -record(nodeToNodeNumMap, {nodeToNodeNumMap}).
 -record(nodeToDoneMap, {nodeToDoneMap}).
 -define(MaxPropagationsPerNode, 10).
 
-start(NumNodes, Topology, Algorithm, Message, ShouldTestFaultTol, NumNodesToKill) ->
-  statistics(runtime),
-  statistics(wall_clock),
+start(NumNodes, Topology, Algorithm, ShouldTestFaultTol, NumNodesToKill) ->
+  Message = "test",
   Pid = spawn(?MODULE, init, [NumNodes, Topology, Algorithm, Message, ShouldTestFaultTol, NumNodesToKill]),
   register(?MODULE, Pid).
 
@@ -33,6 +32,8 @@ init(NumNodes, Topology, Algorithm, Message, ShouldTestFaultTol, NumNodesToKill)
   NodeToDoneMap = #nodeToDoneMap{nodeToDoneMap = maps:new()},
   start_all_actor_nodes(NumNodes, Algorithm, ActiveNodes, NodeToNodeNumMap),
   #adjacencyList{nodeToNbrListMap = 'Util':get_adjacency_list_from_topology(ActiveNodes#activeNodes.activeActorNodes, Topology)},
+  statistics(runtime),
+  statistics(wall_clock),
   initialize_epidemic(Algorithm, Message),
   supervisor_listener_loop(Algorithm, NodeToDoneMap),
   if ShouldTestFaultTol == true ->
@@ -79,7 +80,7 @@ start_all_actor_nodes(
   UpdatedNodeToNodeNumMap = maps:put(NodePid, NumNodesToSpawn, NodeToNodeNumMap),
   start_all_actor_nodes(NumNodesToSpawn-1, Algo,  #activeNodes{activeActorNodes = UpdatedActiveNodes}, #nodeToNodeNumMap{nodeToNodeNumMap = UpdatedNodeToNodeNumMap}).
 
-stop_all_actor_nodes([]) -> {}.
+stop_all_actor_nodes([]) -> {};
 stop_all_actor_nodes([CurrPid | Rest]) ->
   CurrPid ! terminate,
   stop_all_actor_nodes([Rest]).
