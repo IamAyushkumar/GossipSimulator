@@ -30,11 +30,6 @@ st(ListOfPids,Topology,Algorithm) ->
 init(ListOfPids,Topology,Algorithm) ->
   NumberOfActor=length(ListOfPids),
   selectTopology(ListOfPids,Topology),
-  StartTime=erlang:timestamp(),
-  selectAlgorithm(Algorithm,NumberOfActor, StartTime),
-  StopTime=erlang:timestamp(),
-  Diff= StopTime - StartTime,
-  io:fwrite("Time taken ->", Diff).
 
 
 selectTopology(ListOfPids, Topology)->
@@ -45,12 +40,6 @@ selectTopology(ListOfPids, Topology)->
     "imperfect3d" ->createImperfect3D(ListOfPids)
   end.
 
-
-selectAlgorithm(Algorithm,NumberOfActor, StartTime)->
-  case Algorithm of
-    "gossip" -> startGossip(NumberOfActor, StartTime);
-    "push-sum" ->startPushSum(NumberOfActor, StartTime)
-  end.
 
 
 % methods below
@@ -68,7 +57,7 @@ find_X([T], X) ->
 updateAdjIn2D_3D(Actorgraph, X, Y, X_, Y_)->
   T=find_XY(Actorgraph,X,Y),
   T1=find_XY(Actorgraph,X_,Y_),
-  List=#T.Adjacenylist,
+  List=#T.adjacenylist,
   List2=append([T1|List]),
   Actornode=#T{Adjacenylist=List2}.
 
@@ -76,14 +65,14 @@ updateAdjIn2D_3D(Actorgraph, X, Y, X_, Y_)->
 updateAdjInLine(Actorgraph,Pos, Node)->
   T=find_X(Actorgraph,Pos),
   T1=find_X(Actorgraph,Node),
-  List = #T1.Adjacenylist,
+  List = #T1.adjacenylist,
   List2=append([T1|List]),
   Actornode=#T{Adjacenylist=List2}.
 
 
 
 updateInFull(Actorarray,S,N) when S<N ->
-  Start = 0,
+  Start = 0.
   for(Start,N,S,Actorarray) when Start < N ->
     if Start /= S -> update1D(Actorarray,Start,S)
     end,
@@ -206,7 +195,7 @@ make1DGrid(ListOfPid)->
   AllActor=length(ListOfPid),
   S=0,
   I=0,
-  Allactor=[],
+  Allactor=[].
   for(S,AllActor,I,ListOfPid) when S < AllActor ->
     Pid=nth(I,ListOfPid),
     %intialization state of an actor
