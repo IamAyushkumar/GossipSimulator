@@ -9,7 +9,7 @@ for Bonus following are the additional inputs:
 Boolean - 'ShouldTestFaultTolerancy' and 'Number of nodes' to kill if fault tolerancy is to be tested.
 
 Team members (Authors)
-Name	        UFID        emailID
+Name	          UFID        emailID
 Akash Kumar	    80024442    akashkumar@ufl.edu
 Ayush Kumar	    54666085    ayushkumar@ufl.edu
 
@@ -22,6 +22,14 @@ Following Topologies are supported:
 
 For 2D and Imperfect 3D topologies, the number of nodes is rounded to the square of the square root of the input nodes.
 
+Neighbours Example in Topologies:
+          Line:                   Actor3<------ Actor 1 ---> Actor 2
+          Full Network :          Actor 1 --->[N-1 Actor]
+          2D grid :               Actor 1->[4 neighbours- X+1,X-1,Y-1,Y+1]
+          Imprefect 3D:           Actor 1-->[8 neighbours] - ( 4 of (2d grid) + 4 diagonal ) + 1 random node in the network.
+          
+
+
 What is the largest network you managed to deal with for each type of topology and algorithm?
 
 Type of algorithm | gossip | push-sum |
@@ -31,6 +39,7 @@ line              | 70     | 70       |
 2D                | 600    | 700      | 
 imp3D             | 2000   | 3000     | 
 
+
 Test Environment
 OS: Mac OS- Monterey
 Processor: Apple M2
@@ -39,20 +48,3 @@ RAM: 8.0 GB
 10-core GPU
 16-core Neural Engine
 100GB/s memory bandwidth
-
-Gossip
-Line: 5000. It takes about 636.657 seconds to achieve convergence
-2D: 5000. It takes about 430.347 seconds to achieve convergence
-full: 5000. It takes about 276.347 seconds to achieve convergence
-imp3D: 5000. It takes about 421.646 seconds to achieve convergence
-
-Push-sum
-Line: 600. It takes about 1103.321 seconds (~ 18 minutes) to achieve convergence
-2D: 1225. It takes about 164.639 seconds to achieve convergence
-full: 1000. It takes about 3.422 seconds to achieve convergence
-imp3D: 1225. It takes about 4.668 seconds to achieve convergence
-
-
-
-
-
